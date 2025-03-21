@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Broadcast</title>
+</head>
+<body>
+  <h1>Live Audio Broadcast</h1>
+  <script>
+    const ws = new WebSocket('ws://mystinkybroadcast.onrender.com:8080'); // Change to your server URL
+
+    // Check if the browser supports the Web Audio API
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Get the microphone input
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const microphone = audioContext.createMediaStreamSource(stream);
+          const processor = audioContext.createScriptProcessor(2048, 1, 1);
+
+          // Connect the microphone to the audio processor
+          microphone.connect(processor);
+          processor.connect(audioContext.destination);
+
+          // Send audio data in chunks
+          processor.onaudioprocess = (event) => {
+            const buffer = event.inputBuffer.getChannelData(0);
+            // Send the raw audio data over WebSocket
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(buffer);
+            }
+          };
+        })
+        .catch(error => {
+          console.error('Error accessing microphone:', error);
+        });
+    } else {
+      alert('Your browser does not support audio input.');
+    }
+
+    // Handle WebSocket messages from the server
+    ws.onmessage = (event) => {
+      // Create an AudioBuffer from the received data
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const buffer = event.data;
+      audioContext.decodeAudioData(buffer)
+        .then(decodedData => {
+          const source = audioContext.createBufferSource();
+          source.buffer = decodedData;
+          source.connect(audioContext.destination);
+          source.start();
+        })
+        .catch(error => console.error('Error decoding audio:', error));
+    };
+  </script>
+</body>
+</html>

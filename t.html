@@ -8,7 +8,7 @@
 <body>
   <h1>Live Audio Broadcast</h1>
   <script>
-    const ws = new WebSocket('ws://broadcast-v2.onrender.com'); // Change to your server URL
+    const ws = new WebSocket('ws://broadcast-v2.onrender.com:8080'); // Change to your server URL
 
     // Check if the browser supports the Web Audio API
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {

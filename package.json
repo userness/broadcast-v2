@@ -1,0 +1,13 @@
+{
+  "name": "audio-broadcast",
+  "version": "1.0.0",
+  "description": "Live Audio Broadcast using WebSockets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "ws": "^8.5.0"
+  }
+}
